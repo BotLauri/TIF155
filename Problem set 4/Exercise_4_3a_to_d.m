@@ -3,7 +3,7 @@
 clearvars
 tic
 a = 1.4; b = 0.3; nMax = 1000; sqrtInit = 100; 
-numberOfBoxes = [2*10^3, 10^3, 7*10^2, 5*10^2, 3*10^2, 10^2, 5*10^1];
+numberOfBoxes = [3*10^3, 2*10^3, 10^3, 9*10^2, 7*10^2, 5*10^2, 3*10^2, 10^2];
 Iqs = zeros(length(numberOfBoxes), 9); 
 epsilons = zeros(length(numberOfBoxes), 1);
 
@@ -34,11 +34,12 @@ end
 % Make boxes.
 xMin = min(min(min(xList))); xMax = max(max(max(xList)));
 boxXs = linspace(xMin, xMax, numberOfBoxes(epsVal)); 
-boxYs = linspace(xMin, xMax, numberOfBoxes(epsVal)); % Use xMin/xMax again as I want boxes to be squares.
+% Use xMin/xMax again as I want boxes to be squares.
+boxYs = linspace(xMin, xMax, numberOfBoxes(epsVal));
 boxesCounter = zeros(numberOfBoxes(epsVal), numberOfBoxes(epsVal));
 for i = 1:sqrtInit
     for j = 1:sqrtInit
-        for n = 25:nMax
+        for n = 26:nMax % Remove 25 points in the beginning.
             xIndex = floor((xList(i, j, n) - xMin)/(xMax - xMin) * numberOfBoxes(epsVal));
             if (xIndex == 0)
                 xIndex = 1;
@@ -51,19 +52,19 @@ end
 
 % Calculation of Iq for q ∈ [0, 4].
 Iq = zeros(1, 9);
-Ntot = sqrtInit^2*nMax;
+Ntot = sqrtInit^2*(nMax - 25); % Remove 25 points in the beginning.
 epsilon = (xMax - xMin) / numberOfBoxes(epsVal);
-% q = 0.
+% q = 0, separate calculation as 0^0 is equal to 1 in matlab. 
 for j = 1:numberOfBoxes(epsVal)^2
     if (boxesCounter(j) ~= 0)
         Iq(1) = Iq(1) + 1;
     end
 end
 
-% q = 1.
+% q = 1, separate calculation aswell.
 for j = 1:numberOfBoxes(epsVal)^2
-    if (boxesCounter(j) ~= 0)
-        Iq(2) = Iq(2) + (boxesCounter(j)/Ntot)*log(Ntot/boxesCounter(j));
+    if (boxesCounter(j) ~= 0) % log(1/0) = undefined -> 0*log(1/0) = undefined.
+        Iq(2) = Iq(2) + (boxesCounter(j)/Ntot)*log(1/(boxesCounter(j)/Ntot));
     end
 end
 
